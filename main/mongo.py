@@ -99,3 +99,36 @@ class MongoManager:
             await collection.update_one({"tgid": tgid}, {"$set": {"age": value, "status": 2}})
         elif status == 2:
             await collection.update_one({"tgid": tgid}, {"$set": {"bio": value, "status": 3}})
+
+    async def chat_exists(self, tgid):
+        db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
+        collection: AsyncIOMotorCollection = db[self.chat_col]
+        return bool(await collection.find_one({"tgid": tgid}))
+
+    async def start_chat(self, tgid1, tgid2):
+        db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
+        collection: AsyncIOMotorCollection = db[self.chat_col]
+        if not await self.chat_exists(tgid1):
+            await collection.insert_one({"tgid": tgid1, "elsetgid": tgid2})
+            return True
+        else:
+            return False
+
+    async def create_chat_request(self, tgid):
+        db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
+        collection: AsyncIOMotorCollection = db[self.chat_requests_col]
+        if bool(await collection.find_one({"tgid": tgid})):
+            return False
+        else:
+            await collection.insert_one({"tgid": tgid})
+            return True
+
+    async def delete_chat_request(self, tgid):
+        db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
+        collection: AsyncIOMotorCollection = db[self.chat_requests_col]
+        await collection.delete_many({"tgid": tgid})
+
+    async def delete_chat(self, tgid):
+        db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
+        collection: AsyncIOMotorCollection = db[self.chat_col]
+        await collection.delete_many({"tgid": tgid})
