@@ -4,8 +4,8 @@ import asyncio
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.deep_linking import decode_payload
-from main.mongo import MongoManager
-from main.settings import MasterSettings
+from .mongo import MongoManager
+from .settings import MasterSettings
 
 mongo = MongoManager()
 
