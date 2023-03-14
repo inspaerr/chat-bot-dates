@@ -9,7 +9,7 @@ from .settings import MasterSettings
 
 mongo = MongoManager()
 
-bot = Bot(token=MasterSettings.BOT_TOKEN)
+bot = Bot(token=MasterSettings.BOT_TOKEN, validate_token=False)
 dp = Dispatcher(bot)
 
 start_chat_button = types.KeyboardButton(text='Начать чат')

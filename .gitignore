@@ -2,3 +2,6 @@
 .idea
 mireabot_dates.egg-info
 /build
+/docs/_build
+/docs/_static
+/docs/_templates

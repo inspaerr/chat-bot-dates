@@ -6,7 +6,8 @@ from .settings import MasterSettings
 
 
 class MongoManager:
-    """класс для работы с БД
+    """
+    класс для работы с БД
      user structure
      {
        "tgid": "...",
@@ -22,6 +23,7 @@ class MongoManager:
     2 - bio
     3 - everything ready
     """
+
     client: AsyncIOMotorClient = None
     users_col = 'tgusers'
     chat_col = 'chats'
@@ -53,6 +55,7 @@ class MongoManager:
             return None
         else:
             return request[0]
+
     async def user_as_info(self, tgid):
         """получение информации о собеседнике"""
         user = await self.get_user(tgid)
