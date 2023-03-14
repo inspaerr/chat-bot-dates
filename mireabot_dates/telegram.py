@@ -18,12 +18,14 @@ start_chat_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True).add(start_
 stop_chat_button = types.KeyboardButton(text='Закончить чат')
 stop_chat_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True).add(stop_chat_button)
 
+
 @dp.message_handler(commands=["start"])
 async def send_welcome(message: types.message.Message):
     """начало общения бота с пользователем"""
     await message.answer(text="Привет, для того, чтобы начать общение, заполни анкету")
     await message.answer(text="Введи своё имя (никнейм, псевдоним, позывной)")
     await mongo.register_user(message.from_user.id)
+
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def form_fulfill(message: types.message.Message):
@@ -85,7 +87,8 @@ async def form_fulfill(message: types.message.Message):
                     await mongo.start_chat(tgid, request["tgid"])
                     await mongo.start_chat(request["tgid"], tgid)
                     await bot.send_message(chat_id=request['tgid'], text=await mongo.user_as_info(tgid))
-                    await bot.send_message(chat_id=request['tgid'], text="Приятного общения!", reply_markup=stop_chat_keyboard)
+                    await bot.send_message(chat_id=request['tgid'], text="Приятного общения!",
+                                           reply_markup=stop_chat_keyboard)
 
                     await bot.send_message(chat_id=tgid, text=await mongo.user_as_info(request['tgid']))
                     await bot.send_message(chat_id=tgid, text="Приятного общения!", reply_markup=stop_chat_keyboard)
@@ -102,7 +105,8 @@ async def form_fulfill(message: types.message.Message):
                 await message.answer(reply_text)
 
 
-if __name__ == '__main__':
+def run_bot():
+    """запуск бота"""
     loop = asyncio.get_event_loop()
     loop.create_task(mongo.connect())
     executor.start_polling(dp, skip_updates=True)

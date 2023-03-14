@@ -1,16 +1,15 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
-    name='aiogram',
-    version='2.20',
-    packages=['requirements.txt'],
-    author='Софья',
-    author_email='oldbox221b@gmail.com',
-)
-setup(
-    name='motor',
-    version='3.0.0',
-    packages=['requirements.txt'],
-    author='Софья',
-    author_email='oldbox221b@gmail.com',
+    name="mireabot_dates",
+    version="1.0.0",
+    description="mirea-datse chat bot",
+    author="Sonya Kanchura",
+    author_email="oldbox221b@gmail.com",
+    packages=find_packages('requirements.txt'),
+    entry_points={
+        'console_scripts': [
+            'mireabot_dates = mireabot_dates:run_bot'
+        ]
+    }
 )
