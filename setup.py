@@ -9,7 +9,7 @@ setup(
     packages=find_packages('requirements.txt'),
     entry_points={
         'console_scripts': [
-            'mireabot_dates = mireabot_dates:run_bot'
+            'mireabot_dates = mireabot_dates.main:run_bot'
         ]
     }
 )
