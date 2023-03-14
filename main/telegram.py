@@ -1,3 +1,4 @@
+"""основная логика бота"""
 import aiohttp
 import asyncio
 
@@ -19,12 +20,14 @@ stop_chat_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True).add(stop_ch
 
 @dp.message_handler(commands=["start"])
 async def send_welcome(message: types.message.Message):
+    """начало общения бота с пользователем"""
     await message.answer(text="Привет, для того, чтобы начать общение, заполни анкету")
     await message.answer(text="Введи своё имя (никнейм, псевдоним, позывной)")
     await mongo.register_user(message.from_user.id)
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def form_fulfill(message: types.message.Message):
+    """интерфейс создания, завершения чата и заполнения анкеты"""
     tgid = message.from_user.id
     text: str = message.text
     user = await mongo.get_user(tgid)
@@ -40,7 +43,6 @@ async def form_fulfill(message: types.message.Message):
             await bot.send_message(chat_id=chat['elsetgid'], text="Чат закончен", reply_markup=start_chat_keyboard)
         else:
             await bot.send_message(chat_id=chat['elsetgid'], text=text)
-
     else:
         if status == 0:
             field = 'name'

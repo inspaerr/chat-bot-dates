@@ -1,4 +1,4 @@
-import uuid
+"""взаимодействие с базой данных"""
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection, AsyncIOMotorDatabase, AsyncIOMotorCursor
 from datetime import datetime
@@ -6,33 +6,37 @@ from .settings import MasterSettings
 
 
 class MongoManager:
+    """класс для работы с БД
+     user structure
+     {
+       "tgid": "...",
+       "name": "...",
+       "age": "...",
+       "bio": "...",
+       "status": 0,
+     }
+
+    statuses
+    0 - name
+    1 - age
+    2 - bio
+    3 - everything ready
+    """
     client: AsyncIOMotorClient = None
     users_col = 'tgusers'
     chat_col = 'chats'
     chat_requests_col = 'chat_requests'
 
-    # user structure
-    # {
-    #   "tgid": "...",
-    #   "name": "...",
-    #   "age": "...",
-    #   "bio": "...",
-    #   "status": 0,
-    # }
-
-    # statuses
-    # 0 - name
-    # 1 - age
-    # 2 - bio
-    # 3 - everything ready
-
     async def connect(self):
+        """открытие соединения с БД"""
         self.client = AsyncIOMotorClient(MasterSettings.MONGO_HOST, MasterSettings.MONGO_PORT)
 
     async def disconnect(self):
+        """закрытие соединения с БД"""
         self.client.close()
 
     async def get_random_chat_request(self, tgid):
+        """подбор собеседника"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_requests_col]
         request = await collection.aggregate([
@@ -50,6 +54,7 @@ class MongoManager:
         else:
             return request[0]
     async def user_as_info(self, tgid):
+        """получение информации о собеседнике"""
         user = await self.get_user(tgid)
         return f"Информация о твоём(-ей) собеседнике(-це)\n" \
                f"Имя: {user['name']}\n" \
@@ -57,16 +62,19 @@ class MongoManager:
                f"О себе: {user['bio']}\n"
 
     async def get_chat(self, tgid):
+        """получить чат"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_col]
         return await collection.find_one({'tgid': tgid})
 
     async def user_registered(self, tgid):
+        """проверка регистрации пользователя"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.users_col]
         return await collection.find_one({"tgid": tgid})
 
     async def register_user(self, tgid):
+        """регистрация пользоваетля"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.users_col]
         if not await self.user_registered(tgid):
@@ -81,6 +89,7 @@ class MongoManager:
             )
 
     async def get_user(self, tgid):
+        """получение информации о пользователе или его регистрация"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.users_col]
         user = await collection.find_one({"tgid": tgid})
@@ -89,6 +98,7 @@ class MongoManager:
         return user
 
     async def update_user(self, tgid, value):
+        """обновить информацию о пользователе"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.users_col]
         user = await self.get_user(tgid)
@@ -101,11 +111,13 @@ class MongoManager:
             await collection.update_one({"tgid": tgid}, {"$set": {"bio": value, "status": 3}})
 
     async def chat_exists(self, tgid):
+        """проверка существования чата"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_col]
         return bool(await collection.find_one({"tgid": tgid}))
 
     async def start_chat(self, tgid1, tgid2):
+        """инициация чата"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_col]
         if not await self.chat_exists(tgid1):
@@ -115,6 +127,7 @@ class MongoManager:
             return False
 
     async def create_chat_request(self, tgid):
+        """создание запроса на начало чата"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_requests_col]
         if bool(await collection.find_one({"tgid": tgid})):
@@ -124,11 +137,13 @@ class MongoManager:
             return True
 
     async def delete_chat_request(self, tgid):
+        """удаление запроса на начало чата"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_requests_col]
         await collection.delete_many({"tgid": tgid})
 
     async def delete_chat(self, tgid):
+        """удалить чат"""
         db: AsyncIOMotorDatabase = self.client[MasterSettings.MONGO_DB]
         collection: AsyncIOMotorCollection = db[self.chat_col]
         await collection.delete_many({"tgid": tgid})
